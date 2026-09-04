@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客服话术查询工作台</title>
+  <meta name="description" content="搜 SKU 找话术，点击即复制">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    :root {
+      --ink: #171a21;
+      --ink2: #3d414a;
+      --muted: #767a83;
+      --gold: #c9a24b;
+      --gold-deep: #9a7420;
+      --gold-soft: #f6efdd;
+      --line: #e7e2d6;
+      --bg: #f3f0ea;
+      --panel: #ffffff;
+      --dark: #14171e;
+      --success: #10b981;
+    }
+    [data-theme="dark"] {
+      --ink: #f3f0ea;
+      --ink2: #d1d5db;
+      --muted: #9ca3af;
+      --gold: #c9a24b;
+      --gold-deep: #d4af5a;
+      --gold-soft: rgba(201,162,75,0.15);
+      --line: rgba(255,255,255,0.1);
+      --bg: #14171e;
+      --panel: rgba(255,255,255,0.05);
+      --dark: #0e1117;
+    }
+    * { transition: background-color .3s ease, color .3s ease, border-color .3s ease; }
+    body {
+      font-family: 'Inter', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--ink2);
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .orb {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+      filter: blur(90px); opacity: .5; animation: drift 16s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 480px; height: 480px; background: rgba(201,162,75,.16); top: -140px; right: -120px; }
+    .orb-2 { width: 420px; height: 420px; background: rgba(120,134,180,.12); bottom: -160px; left: -140px; animation-delay: -6s; }
+    .orb-3 { width: 300px; height: 300px; background: rgba(201,162,75,.10); top: 42%; left: 58%; animation-delay: -11s; }
+    @keyframes drift {
+      from { transform: translate(0,0) scale(1); }
+      to { transform: translate(60px,40px) scale(1.15); }
+    }
+
+    /* ===== 桌面工作台布局 ===== */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      min-height: 100dvh;
+      position: relative;
+      z-index: 10;
+    }
+    .sidebar {
+      position: sticky; top: 0;
+      height: 100dvh;
+      overflow-y: auto;
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      display: flex; flex-direction: column;
+    }
+    @media (max-width: 920px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+    }
+
+    .cat-item {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; text-align: left;
+      padding: 8px 12px 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--ink2);
+      background: transparent;
+      transition: background-color .15s ease;
+      cursor: pointer;
+    }
+    .cat-item:hover { background: var(--gold-soft); }
+    .cat-item .count {
+      font-family: 'Inter', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 1px 8px;
+      min-width: 28px;
+      text-align: center;
+    }
+    .cat-item.active .count { background: var(--gold-soft); color: var(--gold-deep); }
+
+    .sku-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+    .sku-card:hover { border-color: var(--gold); box-shadow: 0 12px 28px -14px rgba(23,26,33,.18); }
+    .sku-id {
+      font-family: 'Inter', 'Noto Sans SC', monospace;
+      font-size: 13px; font-weight: 700; letter-spacing: .01em;
+      color: var(--gold-deep);
+      background: var(--gold-soft);
+      border: 1px solid rgba(201,162,75,.35);
+      border-radius: 8px;
+      padding: 2px 10px;
+      line-height: 1.5;
+    }
+
+.qa-row { transition: background-color .15s ease; }
+.qa-row:hover { background: var(--gold-soft); }
+
+/* 话术文本：保留换行但忽略模板产生的缩进空格 */
+.reply-text {
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+.copy-btn { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+
+    .search-result { animation: slideUp .3s ease-out; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .shimmer {
+      background: linear-gradient(90deg, var(--gold-soft) 25%, rgba(201,162,75,.25) 50%, var(--gold-soft) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+    ::selection { background: rgba(201,162,75,.28); color: var(--ink); }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="app-shell">
+    <!-- ===== 左侧工具栏 ===== -->
+    <aside class="sidebar">
+      <!-- 头部 -->
+      <div style="padding: 20px 22px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line);">
+        <div class="flex items-center gap-2">
+          <span style="color: var(--gold); font-size: 18px">✿</span>
+          <span class="font-serif font-bold tracking-wider" style="font-family: 'Noto Serif SC', serif; color: var(--ink); font-size: 16px">客服话术工作台</span>
+        </div>
+        <button id="themeToggle" class="w-8 h-8 rounded-full flex items-center justify-center border flex-shrink-0"
+                style="border-color: var(--line); color: var(--muted)" aria-label="切换主题">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 搜索 -->
+      <div style="padding: 16px 22px 4px;">
+        <div style="position: relative;">
+          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input id="searchInput" type="text" placeholder="搜 SKU / 关键词..."
+                 style="width: 100%; border-radius: 10px; border: 1px solid var(--line); padding: 10px 12px 10px 36px; font-size: 13px; outline: none; background: var(--bg); color: var(--ink);"
+                 autocomplete="off">
+        </div>
+      </div>
+
+      <!-- 店铺筛选 -->
+      <div style="padding: 12px 22px 0;">
+        <select id="shopFilter" style="width: 100%; border-radius: 10px; border: 1px solid var(--line); padding: 8px 12px; font-size: 13px; outline: none; cursor: pointer; background: var(--bg); color: var(--ink2)">
+          <option value="">全部店铺</option>
+        </select>
+      </div>
+
+      <!-- 分类导航 -->
+      <div style="padding: 14px 22px 0; flex: 1; min-height: 0; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--muted); text-transform: uppercase;">分类导航</span>
+          <button id="catToggle" aria-label="折叠分类导航"
+                  style="width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); color: var(--muted); background: transparent; cursor: pointer;">
+            <svg id="catToggleIcon" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+        </div>
+        <div id="categoryList" style="overflow-y: auto; padding-bottom: 8px; flex: 1; min-height: 0;"></div>
+      </div>
+
+      <!-- 底部统计 -->
+      <div style="padding: 10px 22px 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted);">
+        <div id="statTotal" style="margin-bottom: 2px;"></div>
+        <div id="statFiltered" style="margin-bottom: 8px;"></div>
+        <button id="clearBtn" hidden style="background: var(--gold-soft); color: var(--gold-deep); font-size: 12px; font-weight: 600; border-radius: 8px; padding: 6px 14px; cursor: pointer;">清除筛选</button>
+      </div>
+    </aside>
+
+    <!-- ===== 右侧内容区 ===== -->
+    <main style="min-width: 0; padding: 28px 32px 64px;">
+      <!-- 头部 -->
+      <header style="margin-bottom: 22px;">
+        <h1 style="font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: 26px; color: var(--ink); margin-bottom: 6px; letter-spacing: .02em;">话术查询</h1>
+        <p id="subtitle" style="font-size: 13px; color: var(--muted);"></p>
+      </header>
+
+      <!-- 结果区 -->
+      <section id="resultsSection">
+        <!-- 空态 -->
+        <div id="emptyState" class="text-center py-24">
+          <div class="text-5xl mb-4">🗂️</div>
+          <h2 class="text-xl font-semibold mb-2" style="color: var(--ink)">还没有话术数据</h2>
+          <p class="text-sm max-w-md mx-auto" style="color: var(--muted)">数据文件 data.json 暂时为空或尚未创建。润色好的话术会随着数据更新自动出现。</p>
+        </div>
+        <!-- 骨架屏 -->
+        <div id="skeleton" class="hidden">
+          <div style="background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; height: 150px;">
+            <div class="shimmer" style="height: 14px; border-radius: 6px; width: 30%; margin-bottom: 12px;"></div>
+            <div class="shimmer" style="height: 11px; border-radius: 6px; width: 100%; margin-bottom: 8px;"></div>
+            <div class="shimmer" style="height: 11px; border-radius: 6px; width: 85%; margin-bottom: 8px;"></div>
+            <div class="shimmer" style="height: 11px; border-radius: 6px; width: 60%;"></div>
+          </div>
+          <div style="background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; height: 150px;">
+            <div class="shimmer" style="height: 14px; border-radius: 6px; width: 30%; margin-bottom: 12px;"></div>
+            <div class="shimmer" style="height: 11px; border-radius: 6px; width: 100%; margin-bottom: 8px;"></div>
+            <div class="shimmer" style="height: 11px; border-radius: 6px; width: 85%; margin-bottom: 8px;"></div>
+            <div class="shimmer" style="height: 11px; border-radius: 6px; width: 60%;"></div>
+          </div>
+        </div>
+        <!-- 结果内容 -->
+        <div id="results" style="max-width: 1100px; margin: 0 auto;"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 一键到顶按钮 -->
+  <button id="toTopBtn" aria-label="回到顶部"
+          style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(23,26,33,.18); border: 1px solid var(--gold); background: var(--panel); color: var(--gold-deep); opacity: 0; pointer-events: none; transition: opacity .3s ease;">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+    </svg>
+  </button>
+
+  <!-- Toast -->
+  <div id="toast" style="display: none; position: fixed; bottom: 24px; right: 84px; z-index: 99999; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.25); font-size: 14px; font-weight: 500; align-items: center; gap: 8px; background: var(--success); color: #fff">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    <span>已复制到剪贴板</span>
+  </div>
+
+  <script>
+    // ========== 全局状态 ==========
+    const state = {
+      allData: [],
+      filtered: [],
+      shop: '',
+      category: '',
+      query: ''
+    };
+
+    // ========== 主题 ==========
+    const themeToggle = document.getElementById('themeToggle');
+    function getTheme() {
+      const saved = localStorage.getItem('kefu-theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      themeToggle.innerHTML = theme === 'dark'
+        ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'
+        : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>';
+      themeToggle.setAttribute('aria-label', theme === 'dark' ? '切换到浅色模式' : '切换到深色模式');
+    }
+    applyTheme(getTheme());
+    themeToggle.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('kefu-theme', next);
+      applyTheme(next);
+    });
+
+    // ========== 分类折叠 ==========
+    const categoryList = document.getElementById('categoryList');
+    const catToggle = document.getElementById('catToggle');
+    const catToggleIcon = document.getElementById('catToggleIcon');
+    function isDesktop() { return window.innerWidth > 920; }
+    function applyCatCollapse() {
+      const collapsed = catToggle.dataset.collapsed === '1';
+      categoryList.style.display = collapsed ? 'none' : 'block';
+      categoryList.style.flex = collapsed ? '0' : '1';
+      // 图标旋转：收起时朝上，展开时朝下
+      catToggleIcon.style.transform = collapsed ? 'rotate(180deg)' : '';
+      catToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    }
+    function setCatCollapse(collapsed) {
+      catToggle.dataset.collapsed = collapsed ? '1' : '0';
+      applyCatCollapse();
+    }
+    if (window.innerWidth <= 920) {
+      setCatCollapse(true);
+    }
+    catToggle.addEventListener('click', () => {
+      setCatCollapse(catToggle.dataset.collapsed !== '1');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 920) {
+        setCatCollapse(true);
+      } else {
+        setCatCollapse(false);
+      }
+    });
+
+    // ========== 数据加载 ==========
+    async function loadData() {
+      const results = document.getElementById('results');
+      const skeleton = document.getElementById('skeleton');
+      const emptyState = document.getElementById('emptyState');
+      skeleton.style.display = 'block';
+      results.innerHTML = '';
+      emptyState.style.display = 'none';
+      try {
+        const res = await fetch('data.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        state.allData = await res.json();
+        populateFilters();
+        renderAll();
+      } catch (e) {
+        console.error(e);
+        skeleton.style.display = 'none';
+        emptyState.style.display = 'block';
+        emptyState.querySelector('h2').textContent = '数据加载失败';
+        emptyState.querySelector('p').textContent = '请检查 data.json 是否存在，或稍后重试。' + (e.message ? '（' + e.message + '）' : '');
+      } finally {
+        skeleton.style.display = 'none';
+      }
+    }
+
+    // ========== 筛选器 ==========
+    function populateFilters() {
+      // 店铺下拉
+      const shops = [...new Set(state.allData.filter(d => d.scope === 'shop' && d.shop).map(d => d.shop))].sort();
+      const shopSel = document.getElementById('shopFilter');
+      shopSel.innerHTML = '<option value="">全部店铺</option>' + shops.map(s => `<option value="${s}">${s}</option>`).join('');
+
+      // 分类导航（含条数）
+      const catCounts = {};
+      state.allData.forEach(d => { catCounts[d.category] = (catCounts[d.category] || 0) + 1; });
+      const list = document.getElementById('categoryList');
+      list.innerHTML =
+        `<button class="cat-item" data-cat=""><span>全部话术</span><span class="count">${state.allData.length}</span></button>` +
+        Object.entries(catCounts).sort((a, b) => b[1] - a[1])
+          .map(([c, n]) => `<button class="cat-item" data-cat="${c}"><span>${c}</span><span class="count">${n}</span></button>`).join('');
+      list.querySelectorAll('.cat-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.category = btn.dataset.cat;
+          highlightCategory();
+          renderAll();
+        });
+      });
+      highlightCategory();
+      // 分类项逐个渐入
+      const items = list.querySelectorAll('.cat-item');
+      gsap.fromTo(items, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: .3, stagger: .03, ease: 'power2.out' });
+
+      // 统计
+      const skus = new Set(state.allData.map(d => d.sku)).size;
+      document.getElementById('statTotal').textContent = `共 ${state.allData.length} 条话术 · ${skus} 个 SKU`;
+    }
+
+    function highlightCategory() {
+      document.querySelectorAll('.cat-item').forEach(btn => {
+        const active = btn.dataset.cat === state.category;
+        btn.classList.toggle('active', active);
+        btn.style.background = active ? 'var(--gold-soft)' : '';
+        btn.style.color = active ? 'var(--gold-deep)' : '';
+        btn.style.fontWeight = active ? '600' : '';
+        btn.style.boxShadow = active ? 'inset 3px 0 0 var(--gold)' : '';
+      });
+    }
+
+    // ========== 搜索与过滤 ==========
+    function applyFilters() {
+      const q = state.query.trim().toLowerCase();
+      state.filtered = state.allData.filter(d => {
+        if (state.shop && d.scope === 'shop' && d.shop !== state.shop) return false;
+        if (state.category && d.category !== state.category) return false;
+        if (!q) return true;
+        return d.sku.toLowerCase().includes(q)
+          || d.title.toLowerCase().includes(q)
+          || d.question.toLowerCase().includes(q)
+          || d.category.toLowerCase().includes(q);
+      });
+      renderResults();
+    }
+
+    function updateSubtitle() {
+      const sub = document.getElementById('subtitle');
+      if (state.query) {
+        sub.textContent = `搜索「${state.query}」 · 共 ${state.filtered.length} 条结果`;
+      } else if (state.shop || state.category) {
+        sub.textContent = `${state.category || '全部话术'}${state.shop ? ' · ' + state.shop : ''} · 共 ${state.filtered.length} 条`;
+      } else {
+        sub.textContent = `共 ${state.allData.length} 条话术，按 SKU 分组展示，点击卡片即复制`;
+      }
+      const cnt = state.filtered.length;
+      document.getElementById('statFiltered').textContent = state.query || state.shop || state.category ? `当前筛选：${cnt} 条` : '';
+      document.getElementById('clearBtn').hidden = !(state.query || state.shop || state.category);
+    }
+
+    function renderAll() {
+      const hasFilters = state.query || state.shop || state.category;
+      if (!hasFilters && state.allData.length > 0) {
+        state.filtered = state.allData;
+        const grouped = groupBySku();
+        updateSubtitle();
+        renderGrouped(grouped);
+      } else {
+        applyFilters();
+        updateSubtitle();
+      }
+    }
+
+    function groupBySku() {
+      const map = new Map();
+      state.allData.forEach(d => {
+        if (!map.has(d.sku)) map.set(d.sku, []);
+        map.get(d.sku).push(d);
+      });
+      return map;
+    }
+
+    function renderGrouped(grouped) {
+      const box = document.getElementById('results');
+      box.innerHTML = '';
+      grouped.forEach((items, sku) => {
+        const first = items[0];
+        const card = document.createElement('div');
+        card.className = 'search-result';
+        card.style.cssText = 'background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 18px; transition: box-shadow .2s ease, border-color .2s ease;';
+        card.addEventListener('mouseenter', () => { card.style.borderColor = 'var(--gold)'; card.style.boxShadow = '0 12px 28px -14px rgba(23,26,33,.18)'; });
+        card.addEventListener('mouseleave', () => { card.style.borderColor = 'var(--line)'; card.style.boxShadow = 'none'; });
+
+        // 卡片头部：SKU 徽章 + 范围徽标 + 条数
+        const head = document.createElement('div');
+        head.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--line);';
+        const badge = first.scope === 'general' ? '通用' : '店铺';
+        head.innerHTML = `
+          <span class="sku-id">${sku}</span>
+          <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: ${first.scope === 'general' ? 'var(--bg)' : 'var(--gold-soft)'}; color: ${first.scope === 'general' ? 'var(--muted)' : 'var(--gold-deep)'};">${badge}</span>
+          <span style="margin-left: auto; font-size: 12px; color: var(--muted);">${items.length} 条</span>`;
+        card.appendChild(head);
+
+        // 商品标题
+        if (first.title) {
+          const title = document.createElement('div');
+          title.style.cssText = 'padding: 10px 20px 0; font-size: 13px; color: var(--muted);';
+          title.textContent = first.title;
+          card.appendChild(title);
+        }
+
+        // 分类分组
+        const catMap = new Map();
+        items.forEach(d => {
+          if (!catMap.has(d.category)) catMap.set(d.category, []);
+          catMap.get(d.category).push(d);
+        });
+        catMap.forEach((catItems, cat) => {
+          const catBlock = document.createElement('div');
+          catBlock.style.cssText = 'padding: 14px 20px 4px;';
+          const catLabel = document.createElement('div');
+          catLabel.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--gold-deep); margin-bottom: 6px;';
+          catLabel.innerHTML = `<span style="width: 4px; height: 14px; border-radius: 2px; background: var(--gold); display: inline-block;"></span>${cat}`;
+          catBlock.appendChild(catLabel);
+          catItems.forEach(d => {
+            const q = document.createElement('div');
+            q.className = 'qa-row';
+            q.style.cssText = 'display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 10px;';
+            // 分段话术：多段分别展示+独立复制；单段话术：整体展示+复制
+            if (d.replySegments && d.replySegments.length > 1) {
+              const segsText = d.replySegments.map(s => ((s.label ? s.label + ' ' : '') + s.text)).join('\n\n');
+              const body = document.createElement('div');
+              body.style.cssText = 'flex: 1; min-width: 0;';
+              const qHeader = document.createElement('div');
+              qHeader.style.cssText = 'display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px;';
+              const qTitle = document.createElement('div');
+              qTitle.style.cssText = 'font-size: 13px; font-weight: 600; color: var(--ink);';
+              qTitle.textContent = d.question;
+              const copyAllBtn = document.createElement('button');
+              copyAllBtn.className = 'copy-btn copy-all';
+              copyAllBtn.style.cssText = 'flex-shrink: 0; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600; border: 1px solid var(--gold); color: var(--gold); background: transparent; white-space: nowrap; cursor: pointer;';
+              copyAllBtn.textContent = '复制全部';
+              copyAllBtn.onmouseover = () => { copyAllBtn.style.background = 'var(--gold)'; copyAllBtn.style.color = '#fff'; };
+              copyAllBtn.onmouseout = () => { copyAllBtn.style.background = 'transparent'; copyAllBtn.style.color = 'var(--gold)'; };
+              copyAllBtn.onclick = (e) => { e.stopPropagation(); copyText(segsText, copyAllBtn); };
+              qHeader.appendChild(qTitle);
+              qHeader.appendChild(copyAllBtn);
+              body.appendChild(qHeader);
+              const segList = document.createElement('div');
+              segList.style.cssText = 'display: flex; flex-direction: column; gap: 6px;';
+              d.replySegments.forEach(seg => {
+                const segRow = document.createElement('div');
+                segRow.style.cssText = 'display: flex; align-items: flex-start; gap: 8px;';
+                const segText = document.createElement('div');
+                segText.style.cssText = 'flex: 1; min-width: 0; font-size: 13px; line-height: 1.65; white-space: pre-line; color: var(--ink2);';
+                if (seg.label) {
+                  const lb = document.createElement('span');
+                  lb.style.cssText = 'display: inline-block; font-family: monospace; font-size: 11px; font-weight: 700; margin-right: 6px; padding: 1px 6px; border-radius: 5px; background: var(--gold-soft); color: var(--gold-deep);';
+                  lb.textContent = seg.label;
+                  segText.appendChild(lb);
+                }
+                segText.appendChild(document.createTextNode(seg.text));
+                const segBtn = document.createElement('button');
+                segBtn.className = 'copy-btn';
+                segBtn.style.cssText = 'flex-shrink: 0; border-radius: 8px; padding: 3px 9px; font-size: 11px; font-weight: 600; border: 1px solid var(--gold); color: var(--gold); background: transparent; opacity: 0; cursor: pointer; transition: opacity .15s ease;';
+                segBtn.textContent = '复制';
+                segBtn.onclick = (e) => { e.stopPropagation(); copyText(seg.text, segBtn); };
+                segRow.addEventListener('mouseenter', () => { segBtn.style.opacity = '1'; });
+                segRow.addEventListener('mouseleave', () => { segBtn.style.opacity = '0'; });
+                segRow.appendChild(segText);
+                segRow.appendChild(segBtn);
+                segList.appendChild(segRow);
+              });
+              body.appendChild(segList);
+              q.appendChild(body);
+            } else {
+              const body = document.createElement('div');
+              body.style.cssText = 'flex: 1; min-width: 0;';
+              const qTitle = document.createElement('div');
+              qTitle.style.cssText = 'font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 3px;';
+              qTitle.textContent = d.question;
+              const replyText = document.createElement('div');
+              replyText.style.cssText = 'font-size: 13px; line-height: 1.65; white-space: pre-line; color: var(--ink2);';
+              replyText.textContent = d.reply;
+              body.appendChild(qTitle);
+              body.appendChild(replyText);
+              const copyBtn = document.createElement('button');
+              copyBtn.className = 'copy-btn';
+              copyBtn.style.cssText = 'flex-shrink: 0; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; border: 1px solid var(--gold); color: var(--gold); background: transparent; cursor: pointer;';
+              copyBtn.textContent = '复制';
+              copyBtn.onmouseover = () => { copyBtn.style.background = 'var(--gold)'; copyBtn.style.color = '#fff'; };
+              copyBtn.onmouseout = () => { copyBtn.style.background = 'transparent'; copyBtn.style.color = 'var(--gold)'; };
+              copyBtn.onclick = () => copyText(d.reply, copyBtn);
+              q.appendChild(body);
+              q.appendChild(copyBtn);
+            }
+            catBlock.appendChild(q);
+          });
+          card.appendChild(catBlock);
+        });
+        box.appendChild(card);
+        gsap.fromTo(card, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .35, ease: 'power2.out' });
+      });
+    }
+
+    function renderResults() {
+      const box = document.getElementById('results');
+      box.innerHTML = '';
+      if (state.filtered.length === 0) {
+        box.innerHTML = '<div style="text-align: center; padding: 60px 0;"><div style="font-size: 36px; margin-bottom: 12px;">🔍</div><p style="font-size: 13px; color: var(--muted);">没有找到匹配的话术，换个关键词试试</p></div>';
+        return;
+      }
+      const grouped = new Map();
+      state.filtered.forEach(d => {
+        if (!grouped.has(d.sku)) grouped.set(d.sku, []);
+        grouped.get(d.sku).push(d);
+      });
+      renderGrouped(grouped);
+    }
+
+    // ========== 复制 ==========
+    function copyText(text, el) {
+      const btn = el && el.closest ? el.closest('.copy-btn') : null;
+      if (btn && btn.dataset.orig === undefined) btn.dataset.orig = btn.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        if (btn) { btn.textContent = '已复制'; btn.style.background = 'var(--success)'; btn.style.borderColor = 'var(--success)'; btn.style.color = '#fff'; }
+        showToast();
+        setTimeout(() => {
+          if (btn) {
+            btn.textContent = btn.dataset.orig;
+            btn.style.background = 'transparent';
+            btn.style.borderColor = 'var(--gold)';
+            btn.style.color = 'var(--gold)';
+          }
+        }, 1200);
+        if (el && el.classList) gsap.fromTo(el, { scale: .98 }, { scale: 1, duration: .2, ease: 'power2.out' });
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast();
+      });
+    }
+
+    let toastTimer;
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.style.display = 'flex';
+      gsap.fromTo(toast, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .25, ease: 'power2.out' });
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        gsap.to(toast, { opacity: 0, y: 12, duration: .2, onComplete: () => { toast.style.display = 'none'; } });
+      }, 1600);
+    }
+
+    // ========== 事件绑定 ==========
+    document.getElementById('searchInput').addEventListener('input', e => {
+      state.query = e.target.value;
+      renderAll();
+    });
+    document.getElementById('shopFilter').addEventListener('change', e => {
+      state.shop = e.target.value;
+      renderAll();
+    });
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      state.query = ''; state.shop = ''; state.category = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('shopFilter').value = '';
+      highlightCategory();
+      renderAll();
+    });
+
+    // ========== 一键到顶 ==========
+    const toTopBtn = document.getElementById('toTopBtn');
+    function updateToTop() {
+      const show = window.scrollY > 400;
+      toTopBtn.style.opacity = show ? '1' : '0';
+      toTopBtn.style.pointerEvents = show ? 'auto' : 'none';
+    }
+    window.addEventListener('scroll', updateToTop, { passive: true });
+    updateToTop();
+    toTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ========== 启动 ==========
+    loadData();
+  </script>
+</body>
+</html>
