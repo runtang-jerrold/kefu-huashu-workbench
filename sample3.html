@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="BI8VfjbKkqUgz9SwEHlGlb">
+<head data-page-node-id="8uodC56iVnCjW1mHpxcMnh">
+  <meta charset="UTF-8" data-page-node-id="aY5RuIzCn7Z3uYCjs9m4z1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="ca2dGM6FK2d2kZwIYo6wwF">
+  <title>客服话术工作台 - GSAP动效风格</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" data-page-node-id="GwFNjOSKc7ocduj9zk06fT">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #0f0f23;
+      --ink: #ffffff;
+      --ink2: #b8b8d4;
+      --muted: #6a6a8a;
+      --gold: #ffd700;
+      --gold-deep: #ffb700;
+      --gold-soft: rgba(255, 215, 0, 0.1);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --success: #00ff88;
+      --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* 动态背景 */
+    .bg-gradient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.1) 0%, transparent 60%);
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+    
+    /* 动效标题 */
+    .animated-header {
+      text-align: center;
+      margin-bottom: 80px;
+      position: relative;
+    }
+    
+    .header-title {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #fff, var(--gold), #fff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 3s linear infinite;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+    
+    @keyframes shine {
+      to { background-position: 200% center; }
+    }
+    
+    .header-subtitle {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto;
+      opacity: 0;
+    }
+    
+    /* 搜索区域动效 */
+    .search-section {
+      max-width: 700px;
+      margin: 0 auto 80px;
+      position: relative;
+      opacity: 0;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 20px 28px 20px 64px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      font-size: 18px;
+      color: var(--ink);
+      outline: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2), 0 20px 40px rgba(0, 0, 0, 0.3);
+      transform: scale(1.02);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus + .search-icon {
+      color: var(--gold);
+      transform: translateY(-50%) scale(1.2);
+    }
+    
+    /* 卡片网格动效 */
+    .cards-container {
+      position: relative;
+    }
+    
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 32px;
+    }
+    
+    /* GSAP动效卡片 */
+    .gsap-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      transform: translateY(60px);
+    }
+    
+    .gsap-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0) 100%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    .gsap-card:hover {
+      transform: translateY(-12px) scale(1.03);
+      border-color: var(--gold);
+      box-shadow: 0 24px 48px rgba(255, 215, 0, 0.2);
+    }
+    
+    .gsap-card:hover::before {
+      opacity: 1;
+    }
+    
+    .card-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.4;
+      flex: 1;
+      margin-right: 16px;
+    }
+    
+    .card-badge {
+      background: var(--gold-soft);
+      color: var(--gold);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .gsap-card:hover .card-badge {
+      background: var(--gold);
+      color: var(--bg);
+      transform: scale(1.1);
+    }
+    
+    .card-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--ink2);
+      margin-bottom: 24px;
+      white-space: pre-line;
+    }
+    
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .card-meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    .copy-button {
+      background: transparent;
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      padding: 10px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .copy-button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: var(--gold);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    
+    .copy-button:hover {
+      color: var(--bg);
+      transform: scale(1.1);
+    }
+    
+    .copy-button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .copy-button span {
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* 滚动触发动画区域 */
+    .scroll-section {
+      margin-top: 120px;
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    
+    .scroll-title {
+      font-size: 32px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 60px;
+      opacity: 0;
+    }
+    
+    .scroll-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    
+    .scroll-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    
+    /* 响应式 */
+    @media (max-width: 1024px) {
+      .scroll-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 20px;
+      }
+      
+      .header-title {
+        font-size: 32px;
+      }
+      
+      .cards-grid, .scroll-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* 复制成功提示 */
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--success);
+      color: var(--bg);
+      padding: 16px 32px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 16px 40px rgba(0, 255, 136, 0.3);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body data-page-node-id="FnA0x4HUGUJC604OSyA8ia">
+  <div class="bg-gradient" data-page-node-id="6NjAwh8Tzvqw0xe70rlhOA"></div>
+  
+  <div class="container" data-page-node-id="OeG3hnJAb6b0E0v2YHXSaz">
+    <div class="animated-header" data-page-node-id="E37Ztc0qBDJ4DvreV1V0b5">
+      <div class="header-title" data-page-node-id="8cfGE18CFoNNxuDIqAC59n">客服话术工作台</div>
+      <div class="header-subtitle" data-page-node-id="e8mQ335gdHzSSbgOw1ByA5">GSAP动效风格 · 滚动触发、弹性动画、交错效果</div>
+    </div>
+    
+    <div class="search-section" data-page-node-id="UAPi2lO2x3R8YtQk1KhGEB">
+      <input type="text" class="search-input" placeholder="输入 SKU 或关键词搜索话术..." data-page-node-id="iQwADw6SUa8abnnQ6npxfS">
+      <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="EvHZDRYtvxvnGtmh3ElLhG">
+        <circle cx="11" cy="11" r="8" data-page-node-id="uC37sTqGIKYgLAS8fR9hXU"></circle>
+        <path d="m21 21-4.35-4.35" data-page-node-id="FbG703B3pWD7a5Duh8seey"></path>
+      </svg>
+    </div>
+    
+    <div class="cards-container" data-page-node-id="RjotRf0Jg1NXOhet8vhBVC">
+      <div class="cards-grid" data-page-node-id="0ourGduwxCDZpI8SXNlqwP">
+        <!-- 卡片1 -->
+        <div class="gsap-card" data-page-node-id="T1zLpOhHTYdrzPAeiEC7bA">
+          <div class="card-content" data-page-node-id="k6REiFHOlOJFiifBA00O0i">
+            <div class="card-header" data-page-node-id="vEtDlAK3Ed8Y39Zt2XoQQF">
+              <div class="card-title" data-page-node-id="qaAuLSrlBRa9FdLc9f7ji3">粘鼠板尺寸规格</div>
+              <div class="card-badge" data-page-node-id="q6AXs5MhWXmJbKNk3EeYY0">100254253261</div>
+            </div>
+            <div class="card-text" data-page-node-id="vA0GhZu9d29rWFCDIovSnn">小主您好，这款粘鼠板尺寸约为148×256mm，具体以实物包装标注为准。厚度0.2cm左右，粘力强劲，使用方便。</div>
+            <div class="card-footer" data-page-node-id="FxopE4cAJY1sKUXRCtRBH0">
+              <div class="card-meta" data-page-node-id="GruAx8cEGuX5ciUYUqRBKc">属性规格 · 2026-09-04</div>
+              <button class="copy-button" data-page-node-id="aKOJxH4FbaitJqsMShmjij"><span data-page-node-id="QshUrVrUH1B40LQdTigC3m">复制话术</span></button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 卡片2 -->
+        <div class="gsap-card" data-page-node-id="l6Vkaf3uqkaDa9OulyHs8c">
+          <div class="card-content" data-page-node-id="3UWjRZrD2uG8JJysAJJXw5">
+            <div class="card-header" data-page-node-id="bFj3YpZ0lpXNQAmBuCDvz5">
+              <div class="card-title" data-page-node-id="SzvauqUxSG3rtlwjL6ArOE">香港大药房品牌说明</div>
+              <div class="card-badge" data-page-node-id="7wmmOeKki0WEFYSodYv9sZ">100238746933</div>
+            </div>
+            <div class="card-text" data-page-node-id="bxXvlTTkUgevZ4qVL4YTia">您好，关于您反馈的问题我们已核实："香港大药房"为我司登记注册的商标名称，不代表生产厂家或产地；商品并非药品，不作为药品使用。</div>
+            <div class="card-footer" data-page-node-id="ZcAYC033qQcWoyktHPmBBf">
+              <div class="card-meta" data-page-node-id="6avVQGZDCAONHh3T9vWatP">合规投诉 · 2026-09-04</div>
+              <button class="copy-button" data-page-node-id="tmABDK5ePRAVZpY2FXFLqj"><span data-page-node-id="Ccs4fOfAH5OSdKkeCKw20d">复制话术</span></button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 卡片3 -->
+        <div class="gsap-card" data-page-node-id="73FxuiduAkKdaLmofIdfE7">
+          <div class="card-content" data-page-node-id="qYNMuRmZMDuQVFvxUsNjI4">
+            <div class="card-header" data-page-node-id="s6lOg9ajEbLwjF4LIjSjf6">
+              <div class="card-title" data-page-node-id="JOeTl3X80GPPPDADP9sfFb">发货时效说明</div>
+              <div class="card-badge" data-page-node-id="gFjEsQjyXd1oJAddF0rCTX">100254253261</div>
+            </div>
+            <div class="card-text" data-page-node-id="AQhreYcqI9k7ORyaomeeAy">小主您好，我们是京东自营仓库发货，一般下单后24小时内出库，具体以物流信息为准哦~大部分地区2-3天可以送达。</div>
+            <div class="card-footer" data-page-node-id="FldcBIqfb1ZEpKD3C5Ah8u">
+              <div class="card-meta" data-page-node-id="miH4fjJ5Qu97kbOZds2PDp">物流问题 · 2026-09-04</div>
+              <button class="copy-button" data-page-node-id="ru4gr5HkA5ZjExO5QNmYlY"><span data-page-node-id="r3UYSDGA3nNDayH4YZBtAC">复制话术</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 滚动触发动画区域 -->
+    <div class="scroll-section" data-page-node-id="izcvjru6V5DhNAKo3DSFje">
+      <div class="scroll-title" data-page-node-id="FwOXSMpSYCzCQQLZMKjcsK">更多话术展示（滚动触发动画）</div>
+      
+      <div class="scroll-cards" data-page-node-id="cKJzxxrC5khcTeRxbQKA7I">
+        <div class="scroll-card" data-page-node-id="Ugm2Ep6joZng4QEwHgCZXg">
+          <div class="card-content" data-page-node-id="9ht27Bfl0dGqB4VbD93bnh">
+            <div class="card-header" data-page-node-id="rUosvYBvad8cMN0Dnh5V2R">
+              <div class="card-title" data-page-node-id="0WHUiahRKfY2UaObjBKjVe">产品使用方法</div>
+              <div class="card-badge" data-page-node-id="BYNJV5lL1Erqpir77tfpYB">100238746933</div>
+            </div>
+            <div class="card-text" data-page-node-id="F3i9JoDfglKNDQ6soVM4bR">小主您好，使用前请先清洁需要处理的部位，取适量本品均匀涂抹，轻轻按摩至吸收即可。</div>
+            <div class="card-footer" data-page-node-id="mn8rdS6ZzJmF9GBttttdVL">
+              <div class="card-meta" data-page-node-id="KHzcevkkp9FuenXPS0XD8R">使用说明 · 2026-09-04</div>
+              <button class="copy-button" data-page-node-id="2I5byX6Hg2sDVGLh2RG6Qf"><span data-page-node-id="2S0WQMuT0yXwS05MnBzwtX">复制</span></button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="scroll-card" data-page-node-id="9e38Sn9r6EvYmPpj62wH7Z">
+          <div class="card-content" data-page-node-id="l4UWSovAhwUNNF4CjcYEEU">
+            <div class="card-header" data-page-node-id="6jwqWIQJE6RDU83UE67H3p">
+              <div class="card-title" data-page-node-id="eyDMLoFhjYj4fqE7nIMBwL">退换货政策</div>
+              <div class="card-badge" data-page-node-id="Gr4wXyId4osHNKY4cZ5Xge">100254253261</div>
+            </div>
+            <div class="card-text" data-page-node-id="lZQ7b75YrmrtoYlTV5vRDO">小主您好，我们支持7天无理由退换货，商品需保持原包装完好。如有质量问题，我们承担退换货运费。</div>
+            <div class="card-footer" data-page-node-id="SGDoZW6teeoiqL7gWVWDu5">
+              <div class="card-meta" data-page-node-id="aPDcmD1v73CsSR6oODAuDG">售后政策 · 2026-09-04</div>
+              <button class="copy-button" data-page-node-id="uAUGvJrQ0SHZFh9LGAwqax"><span data-page-node-id="twwC1BjLqLAtxSH2n6QMDq">复制</span></button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="scroll-card" data-page-node-id="s2mDqnYTYeSTcVF6xsthIM">
+          <div class="card-content" data-page-node-id="nt5jHK0wVyVB4R1M97elTw">
+            <div class="card-header" data-page-node-id="U7AR9n8z7WDoHEa6v81p1w">
+              <div class="card-title" data-page-node-id="6YIcQH8yxi3LxHVrT1Ebe4">优惠活动咨询</div>
+              <div class="card-badge" data-page-node-id="OPBTDUURQLgWGl9F5JTNk6">100238746933</div>
+            </div>
+            <div class="card-text" data-page-node-id="HqwV0tgoQVZHSmYyRhF1UL">小主您好，当前店铺有满199减30的活动，具体以商品页面显示为准。活动期间下单更优惠哦~</div>
+            <div class="card-footer" data-page-node-id="DjMcF7F7j6BSI4YPmkip4x">
+              <div class="card-meta" data-page-node-id="oFr9RWtYjrwEBgKwkjCOtM">促销活动 · 2026-09-04</div>
+              <button class="copy-button" data-page-node-id="UMt4MzTWezP7e2nAhJzpvN"><span data-page-node-id="9kb7yD0mHXriDheBfn60NP">复制</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 复制成功提示 -->
+  <div class="toast" id="toast" data-page-node-id="F4948BWGgsCCB8YUcq6ozc">✓ 已复制到剪贴板</div>
+  
+  <script>
+    // 注册ScrollTrigger插件
+    gsap.registerPlugin(ScrollTrigger);
+    
+    // 初始动画时间线
+    const tl = gsap.timeline();
+    
+    tl.to('.header-title', {
+      duration: 1,
+      opacity: 1,
+      y: 0,
+      ease: 'power3.out'
+    })
+    .to('.header-subtitle', {
+      duration: 0.8,
+      opacity: 1,
+      y: 0,
+      ease: 'power3.out'
+    }, '-=0.4')
+    .to('.search-section', {
+      duration: 0.8,
+      opacity: 1,
+      y: 0,
+      ease: 'power3.out'
+    }, '-=0.4');
+    
+    // 卡片入场动画
+    gsap.to('.gsap-card', {
+      duration: 0.8,
+      opacity: 1,
+      y: 0,
+      stagger: 0.15,
+      ease: 'back.out(1.7)',
+      delay: 0.5
+    });
+    
+    // 滚动触发动画
+    gsap.to('.scroll-title', {
+      scrollTrigger: {
+        trigger: '.scroll-title',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      duration: 1,
+      opacity: 1,
+      y: 0,
+      ease: 'power3.out'
+    });
+    
+    gsap.to('.scroll-card', {
+      scrollTrigger: {
+        trigger: '.scroll-cards',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      duration: 0.8,
+      opacity: 1,
+      y: 0,
+      stagger: 0.2,
+      ease: 'power3.out'
+    });
+    
+    // 搜索框焦点动画
+    const searchInput = document.querySelector('.search-input');
+    searchInput.addEventListener('focus', function() {
+      gsap.to(this, {
+        duration: 0.3,
+        scale: 1.02,
+        ease: 'power2.out'
+      });
+    });
+    
+    searchInput.addEventListener('blur', function() {
+      gsap.to(this, {
+        duration: 0.3,
+        scale: 1,
+        ease: 'power2.out'
+      });
+    });
+    
+    // 复制功能
+    document.querySelectorAll('.copy-button').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const card = this.closest('.gsap-card, .scroll-card');
+        const content = card.querySelector('.card-text').textContent;
+        
+        // 复制动画
+        gsap.to(this, {
+          duration: 0.2,
+          scale: 0.95,
+          yoyo: true,
+          repeat: 1,
+          ease: 'power2.inOut'
+        });
+        
+        // 复制到剪贴板
+        navigator.clipboard.writeText(content).then(() => {
+          // 显示提示
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
+          
+          // 提示动画
+          gsap.from(toast, {
+            duration: 0.5,
+            scale: 0.8,
+            ease: 'back.out(1.7)'
+          });
+          
+          // 按钮状态变化
+          const span = this.querySelector('span');
+          const originalText = span.textContent;
+          span.textContent = '✓ 已复制';
+          this.style.background = 'var(--success)';
+          this.style.borderColor = 'var(--success)';
+          this.style.color = 'var(--bg)';
+          
+          // 2秒后恢复
+          setTimeout(() => {
+            span.textContent = originalText;
+            this.style.background = 'transparent';
+            this.style.borderColor = 'var(--gold)';
+            this.style.color = 'var(--gold)';
+            toast.classList.remove('show');
+          }, 2000);
+        });
+      });
+    });
+    
+    // 卡片悬停动画增强
+    document.querySelectorAll('.gsap-card, .scroll-card').forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        gsap.to(this, {
+          duration: 0.4,
+          y: -12,
+          scale: 1.03,
+          ease: 'power2.out'
+        });
+        
+        gsap.to(this.querySelector('.card-badge'), {
+          duration: 0.3,
+          scale: 1.1,
+          ease: 'power2.out'
+        });
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        gsap.to(this, {
+          duration: 0.4,
+          y: 0,
+          scale: 1,
+          ease: 'power2.out'
+        });
+        
+        gsap.to(this.querySelector('.card-badge'), {
+          duration: 0.3,
+          scale: 1,
+          ease: 'power2.out'
+        });
+      });
+    });
+  </script>
+</body>
+</html>

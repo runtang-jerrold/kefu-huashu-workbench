@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="NPZ7j8ZWnv0NMIqFircoQD">
+<head data-page-node-id="gzmJMALgVHiX1hdOte6qQK">
+  <meta charset="UTF-8" data-page-node-id="bwa9lAr1fp9odbyzRwcFJx">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="nBxq9cZ6X64rIjUMwBIRSK">
+  <title>客服话术工作台 - 毛玻璃风格</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" data-page-node-id="HC2HcSFwifYh3nxtEEeSso">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #f3f0ea;
+      --ink: #171a21;
+      --ink2: #3d414a;
+      --muted: #767a83;
+      --gold: #c9a24b;
+      --gold-deep: #9a7420;
+      --gold-soft: rgba(201, 162, 75, 0.15);
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-blur: 12px;
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --success: #10b981;
+    }
+    
+    [data-theme="dark"] {
+      --bg: #14171e;
+      --ink: #f3f0ea;
+      --ink2: #d1d5db;
+      --muted: #9ca3af;
+      --gold-soft: rgba(201, 162, 75, 0.15);
+      --glass-bg: rgba(20, 23, 30, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+    
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg);
+      color: var(--ink2);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(201, 162, 75, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(120, 134, 180, 0.1) 0%, transparent 50%);
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+      gap: 24px;
+      padding: 24px;
+    }
+    
+    /* 毛玻璃侧边栏 */
+    .sidebar {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 24px;
+      height: fit-content;
+      position: sticky;
+      top: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .logo {
+      width: 40px;
+      height: 40px;
+      background: var(--gold);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .search-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-soft);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+    
+    .filter-group {
+      margin-bottom: 20px;
+    }
+    
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .filter-select {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--ink2);
+      outline: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-select:focus {
+      border-color: var(--gold);
+    }
+    
+    .category-list {
+      margin-top: 24px;
+    }
+    
+    .category-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .category-item:hover {
+      background: var(--gold-soft);
+    }
+    
+    .category-item.active {
+      background: var(--gold);
+      color: white;
+    }
+    
+    .category-count {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    /* 主内容区 */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .header {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+    
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    /* 卡片网格 */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    
+    /* 毛玻璃卡片 */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-deep));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .glass-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(201, 162, 75, 0.15);
+      border-color: var(--gold);
+    }
+    
+    .glass-card:hover::before {
+      opacity: 1;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    
+    .card-badge {
+      background: var(--gold-soft);
+      color: var(--gold-deep);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    .card-content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--ink2);
+      margin-bottom: 16px;
+      white-space: pre-line;
+    }
+    
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    
+    .copy-button {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .copy-button:hover {
+      background: var(--gold);
+      color: white;
+    }
+    
+    .copy-button:active {
+      transform: scale(0.98);
+    }
+    
+    /* 响应式 */
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+      
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* 加载动画 */
+    .loading-skeleton {
+      background: linear-gradient(90deg, var(--gold-soft) 25%, rgba(201, 162, 75, 0.25) 50%, var(--gold-soft) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* 复制成功提示 */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--success);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body data-page-node-id="3jxQYioTCcYBF8S1Rcu8ha">
+  <div class="container" data-page-node-id="u2nxgQ3F7Ki2OpgGuZHGqv">
+    <!-- 侧边栏 -->
+    <aside class="sidebar" data-page-node-id="g0TBlGwRHETMvUdijCwZ6i">
+      <div class="sidebar-header" data-page-node-id="ETYUZ5g5y1DH6la0rQ5kUT">
+        <div class="logo" data-page-node-id="CSFFioeC0L2VAa1HVid9is">话</div>
+        <div data-page-node-id="5Vyg0DB0tNjExopvJZ4L2q">
+          <div style="font-weight: 700; color: var(--ink); font-size: 16px;" data-page-node-id="6lPSwEDabgO8ca9DAkTCMd">客服话术工作台</div>
+          <div style="font-size: 12px; color: var(--muted);" data-page-node-id="YEdj0S1kTS7T8BLCjDaLmd">毛玻璃风格 v1</div>
+        </div>
+      </div>
+      
+      <div class="search-box" data-page-node-id="fwtWfDwPw7Y3135qh83Rah">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="3Ev9pEMPx8G8ndLCIwonjf">
+          <circle cx="11" cy="11" r="8" data-page-node-id="CDZkZBKXnHG0L1ErFmQAQb"></circle>
+          <path d="m21 21-4.35-4.35" data-page-node-id="Cjmw35KKxv8qYhghGCJ8dC"></path>
+        </svg>
+        <input type="text" class="search-input" placeholder="搜 SKU / 关键词..." data-page-node-id="8a32W0lAHAYRIsHYN6vM1u">
+      </div>
+      
+      <div class="filter-group" data-page-node-id="Hub6ts54laB2nxXN8av6SP">
+        <label class="filter-label" data-page-node-id="gMwmMBkPPWmN6kbtCzog0c">店铺筛选</label>
+        <select class="filter-select" data-page-node-id="8zFH2ClWwVm6CTlUsYQjyA">
+          <option data-page-node-id="BIM6Gxy2530r5VKNcz4vLb">全部店铺</option>
+          <option data-page-node-id="rbQkGRxTx0SfAOJWdBWpnG">DR.LORIYA</option>
+          <option data-page-node-id="iV5yH2THeQLsrjVMFkQw8P">其他店铺</option>
+        </select>
+      </div>
+      
+      <div class="filter-group" data-page-node-id="8DK8Rc2KGzJUKJQEoHlzwn">
+        <label class="filter-label" data-page-node-id="zyX36QZmv6NJyLfuCzyzsP">问题分类</label>
+        <select class="filter-select" data-page-node-id="3ANPBsXshoUtNlNSoVB3Ii">
+          <option data-page-node-id="eBRT73CdwR0bwtpQuj6d0e">全部分类</option>
+          <option data-page-node-id="ZZ0MZw6rNB3xYDYvpj9yvl">属性规格</option>
+          <option data-page-node-id="PgSonnV4cf6CVm1hjcIBpB">合规投诉</option>
+          <option data-page-node-id="ht2FBDnudpZ0x4aCFzJNjf">物流问题</option>
+        </select>
+      </div>
+      
+      <div class="category-list" data-page-node-id="orqUHgpfp9B2IY9Ot80eM4">
+        <div class="filter-label" data-page-node-id="Qmedj1wZYnG6rUkMFlxYs4">分类导航</div>
+        <div class="category-item active" data-page-node-id="LuZgU5sR6pzPKiDQ8Dlhlh">
+          <span data-page-node-id="Hk7nDYr4jBBpm3m6bRrQdb">全部话术</span>
+          <span class="category-count" data-page-node-id="pvr0d4rUXhpmzIuK4BnJTL">551</span>
+        </div>
+        <div class="category-item" data-page-node-id="GrPMHKtcCrs27YYCGkRU02">
+          <span data-page-node-id="bVvkvH1ZT7nQmAUubJMp0J">属性规格</span>
+          <span class="category-count" data-page-node-id="E4NokucqaIdA5GIuSBX7D6">128</span>
+        </div>
+        <div class="category-item" data-page-node-id="DaquFDkuRxL9qOCC9GpOr7">
+          <span data-page-node-id="cEWPo76cVC94vtRDYxwpXR">合规投诉</span>
+          <span class="category-count" data-page-node-id="ROlAH7BDAwKbnjSnPzZjlq">89</span>
+        </div>
+        <div class="category-item" data-page-node-id="hL2kFaxYioP52fYqEzSF5W">
+          <span data-page-node-id="DEJFKqAKYrmJSDJCgXFrK2">物流问题</span>
+          <span class="category-count" data-page-node-id="RV6rZNqFZ8F5sYficzgEzn">156</span>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- 主内容区 -->
+    <main class="main-content" data-page-node-id="IKpVQzC1hn2rvbcFqmbeAz">
+      <div class="header" data-page-node-id="ywBuYP1xNrIU56asq06XK4">
+        <div class="header-title" data-page-node-id="XBarC8twfhg4BcImWvuNxj">话术查询</div>
+        <div class="header-subtitle" data-page-node-id="8dehQtm5cYLBhJVMNH9DEg">共 551 条话术 · 毛玻璃风格演示</div>
+      </div>
+      
+      <div class="cards-grid" data-page-node-id="fQhVQMp8haqYW41zoZk0bZ">
+        <!-- 卡片1 -->
+        <div class="glass-card" data-page-node-id="PqzBVG34UCM6VEOBy38H5C">
+          <div class="card-header" data-page-node-id="F4CnfsVMXroPUqBt1JGKlM">
+            <div class="card-title" data-page-node-id="Svprrf0o83EvBqbyGyNp0y">粘鼠板尺寸</div>
+            <div class="card-badge" data-page-node-id="91TwKhCxhTacrINsdDXNZd">SKU: 100254253261</div>
+          </div>
+          <div class="card-content" data-page-node-id="MgSE60dAXCS9nS9iTI84TJ">小主您好，这款粘鼠板尺寸约为148×256mm，具体以实物包装标注为准。厚度0.2cm左右</div>
+          <div class="card-footer" data-page-node-id="FK0oGgmBFacLFSvGSM7Z4d">
+            <div class="card-meta" data-page-node-id="D1jptJxZJzNFqMAC9OegWU">属性规格 · 更新于 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="y46VOY1AzJUutRXWhLXiIZ">复制</button>
+          </div>
+        </div>
+        
+        <!-- 卡片2 -->
+        <div class="glass-card" data-page-node-id="ge0jeBXtV7JB7qEqPMgXCg">
+          <div class="card-header" data-page-node-id="wod7SZaG8GT9HAeqZSZ8zS">
+            <div class="card-title" data-page-node-id="ms5eRzrqgkb1q4DhfAe96T">香港大药房是不是产地</div>
+            <div class="card-badge" data-page-node-id="nNYD6nviG1MCDNvZ00FXrB">SKU: 100238746933</div>
+          </div>
+          <div class="card-content" data-page-node-id="SF3UzQiJojSop211bcje39">您好，关于您反馈的问题我们已核实："香港大药房"为我司登记注册的商标名称，不代表生产厂家或产地；商品页面及包装信息以实际展示为准，商品并非药品，不作为药品使用。</div>
+          <div class="card-footer" data-page-node-id="gLHUMUBkBoxGJt1rXTasXB">
+            <div class="card-meta" data-page-node-id="smcrN3IVkmMwZBH05xpFiK">合规投诉 · 更新于 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="xWNTu3rpqbmfIEKBLCUgbB">复制</button>
+          </div>
+        </div>
+        
+        <!-- 卡片3 -->
+        <div class="glass-card" data-page-node-id="yqqFbs07QndNExvurJ05rX">
+          <div class="card-header" data-page-node-id="xSgWmyFdWyfVCqYyPbtMJC">
+            <div class="card-title" data-page-node-id="3mM0caTWcaE1cXhGsGi0FM">发货时间咨询</div>
+            <div class="card-badge" data-page-node-id="5lPXd8UgLCOg3XibyS8laS">SKU: 100254253261</div>
+          </div>
+          <div class="card-content" data-page-node-id="Pv60ZuerdkkzjuesDDsYFr">小主您好，我们是京东自营仓库发货，一般下单后24小时内出库，具体以物流信息为准哦~</div>
+          <div class="card-footer" data-page-node-id="OdBF3VY5YoVqQBwk9r1WD2">
+            <div class="card-meta" data-page-node-id="1i41fnoezwAZuE46hLBe7G">物流问题 · 更新于 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="GfOfnQCQNIEcCS4txqDgTS">复制</button>
+          </div>
+        </div>
+        
+        <!-- 卡片4 -->
+        <div class="glass-card" data-page-node-id="WmFnVNLBFvmL3M7QwxXMVG">
+          <div class="card-header" data-page-node-id="nPnMED1drQFpXe2VvFMAr5">
+            <div class="card-title" data-page-node-id="c52gGNdMcjniHhNtNNSB2A">产品使用方法</div>
+            <div class="card-badge" data-page-node-id="X8jPnMiPeMG5QkKGPxGFUi">SKU: 100238746933</div>
+          </div>
+          <div class="card-content" data-page-node-id="yMIEQEVxPd2EAeX6OUlMW1">小主您好，使用前请先清洁需要处理的部位，取适量本品均匀涂抹，轻轻按摩至吸收即可。每日2-3次，效果更佳。</div>
+          <div class="card-footer" data-page-node-id="GzZCYGiuXFasLXEUZYcDuG">
+            <div class="card-meta" data-page-node-id="zXYJguf7RbsE90TXNyIQEd">使用说明 · 更新于 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="OFAizSJ0BAV38LMGXR4WqR">复制</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 复制成功提示 -->
+  <div class="toast" id="toast" data-page-node-id="Hz0tvoAGxaCeIdFZJP4VRR">已复制到剪贴板</div>
+  
+  <script>
+    // 模拟复制功能
+    document.querySelectorAll('.copy-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const card = this.closest('.glass-card');
+        const content = card.querySelector('.card-content').textContent;
+        
+        // 复制到剪贴板
+        navigator.clipboard.writeText(content).then(() => {
+          // 显示提示
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
+          
+          // 按钮状态变化
+          this.textContent = '已复制';
+          this.style.background = 'var(--success)';
+          this.style.borderColor = 'var(--success)';
+          this.style.color = 'white';
+          
+          // 2秒后恢复
+          setTimeout(() => {
+            this.textContent = '复制';
+            this.style.background = 'transparent';
+            this.style.borderColor = 'var(--gold)';
+            this.style.color = 'var(--gold)';
+            toast.classList.remove('show');
+          }, 2000);
+        });
+      });
+    });
+    
+    // GSAP入场动画
+    gsap.from('.glass-card', {
+      duration: 0.6,
+      y: 30,
+      opacity: 0,
+      stagger: 0.1,
+      ease: 'power3.out'
+    });
+    
+    // 主题切换（示例）
+    document.querySelector('.logo').addEventListener('click', function() {
+      const body = document.body;
+      const currentTheme = body.getAttribute('data-theme');
+      body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+    });
+  </script>
+</body>
+</html>

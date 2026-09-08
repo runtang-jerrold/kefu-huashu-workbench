@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="N1XwDnnHPAjv0GMC1t7Y3N">
+<head data-page-node-id="f57YvpgKKRSW9W0aExkeUS">
+  <meta charset="UTF-8" data-page-node-id="SfgLLGAwXNvsL58XNiQ4p5">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="ZsHxhkUgg20sqvH8sc7hps">
+  <title>客服话术工作台 - 卡片悬浮风格</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" data-page-node-id="Yp2xt5nCEQVoGKSkZRE0Xz">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #f8f9fa;
+      --ink: #1a1a2e;
+      --ink2: #4a4a6a;
+      --muted: #8a8aa3;
+      --gold: #d4af37;
+      --gold-deep: #b8960f;
+      --gold-soft: rgba(212, 175, 55, 0.1);
+      --card-bg: #ffffff;
+      --border: #e9ecef;
+      --success: #28a745;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+      --shadow-gold: 0 12px 32px rgba(212, 175, 55, 0.2);
+    }
+    
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg);
+      color: var(--ink2);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .header-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    
+    .header-subtitle {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .search-section {
+      max-width: 600px;
+      margin: 0 auto 48px;
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 16px 24px 16px 56px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      font-size: 16px;
+      color: var(--ink);
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .search-input:focus {
+      border-color: var(--gold);
+      box-shadow: var(--shadow-gold);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      transition: color 0.3s ease;
+    }
+    
+    .search-input:focus + .search-icon {
+      color: var(--gold);
+    }
+    
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
+    }
+    
+    /* 卡片悬浮风格 */
+    .hover-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+    
+    .hover-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(212, 175, 55, 0) 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    
+    .hover-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      transform: scale(0.5);
+    }
+    
+    .hover-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--gold);
+      box-shadow: var(--shadow-gold);
+    }
+    
+    .hover-card:hover::before {
+      opacity: 1;
+    }
+    
+    .hover-card:hover::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .card-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.4;
+      flex: 1;
+      margin-right: 12px;
+    }
+    
+    .card-badge {
+      background: var(--gold-soft);
+      color: var(--gold-deep);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+    }
+    
+    .hover-card:hover .card-badge {
+      background: var(--gold);
+      color: white;
+    }
+    
+    .card-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--ink2);
+      margin-bottom: 20px;
+      white-space: pre-line;
+    }
+    
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .card-meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .copy-button {
+      background: transparent;
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .copy-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .copy-button:hover {
+      background: var(--gold);
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    .copy-button:hover::before {
+      left: 100%;
+    }
+    
+    .copy-button:active {
+      transform: scale(0.98);
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-title {
+        font-size: 24px;
+      }
+    }
+    
+    /* 加载动画 */
+    .loading-skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 12px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* 复制成功提示 */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--success);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 12px 32px rgba(40, 167, 69, 0.3);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body data-page-node-id="TaChD1m4fQG4rNOMhBAOqX">
+  <div class="container" data-page-node-id="Rkv3VwWCjLcolW3etdh38f">
+    <div class="header" data-page-node-id="jZvAIEXOOqSEJTkaqZkbv2">
+      <div class="header-title" data-page-node-id="j1m2mXsDIImc9JaN6lryOV">客服话术工作台</div>
+      <div class="header-subtitle" data-page-node-id="GpM5egaGIEGKNKo4b4UEaD">卡片悬浮风格 · 悬停查看交互效果</div>
+    </div>
+    
+    <div class="search-section" data-page-node-id="M6PlPNEAVKPteWoHR2lsVe">
+      <input type="text" class="search-input" placeholder="输入 SKU 或关键词搜索话术..." data-page-node-id="HZkJ7Se4FcMxuLSURkSQ8w">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="oafCkxwOf5ECczYLTWHBIo">
+        <circle cx="11" cy="11" r="8" data-page-node-id="jXwjt2UG8G7n8GyswJBOUe"></circle>
+        <path d="m21 21-4.35-4.35" data-page-node-id="Pi4jzDn1RmjNgQO7UDzSx4"></path>
+      </svg>
+    </div>
+    
+    <div class="cards-grid" data-page-node-id="NzBFbQWGHBceAq7z8ALetV">
+      <!-- 卡片1 -->
+      <div class="hover-card" data-page-node-id="e7gtooucmMsuo6dZyOUVeL">
+        <div class="card-content" data-page-node-id="4UuiQAb19OATyE75UTMIfJ">
+          <div class="card-header" data-page-node-id="tYNjDTDFOJPcS1iJCux1Aa">
+            <div class="card-title" data-page-node-id="jnZJ3kdUI1xGE85ZKFJbki">粘鼠板尺寸规格</div>
+            <div class="card-badge" data-page-node-id="gQERG1ayiv6igrtH8FS2ez">100254253261</div>
+          </div>
+          <div class="card-text" data-page-node-id="rxPLlyPEWOyiiYsM8LMo4C">小主您好，这款粘鼠板尺寸约为148×256mm，具体以实物包装标注为准。厚度0.2cm左右，粘力强劲，使用方便。</div>
+          <div class="card-footer" data-page-node-id="E9xMMppTgOUyBar92v4rQs">
+            <div class="card-meta" data-page-node-id="rGleyNEMiFfDxT7Ad9VV8e">属性规格 · 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="BjErL3DJJkH563LBaohXAa">复制话术</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 卡片2 -->
+      <div class="hover-card" data-page-node-id="Tv8oXzT75t9WCffrgzfVtE">
+        <div class="card-content" data-page-node-id="1XQ2bmIU5HAAYqpY60NWfj">
+          <div class="card-header" data-page-node-id="fShP0HYZ3CzLCGL5bi18tH">
+            <div class="card-title" data-page-node-id="JB5fdZH7GvC8dJaVw8qAIR">香港大药房品牌说明</div>
+            <div class="card-badge" data-page-node-id="LsqddggiWxYCK54JTwXJ9H">100238746933</div>
+          </div>
+          <div class="card-text" data-page-node-id="aX8Ce0vxfoFIqFNwxyGPgv">您好，关于您反馈的问题我们已核实："香港大药房"为我司登记注册的商标名称，不代表生产厂家或产地；商品并非药品，不作为药品使用。</div>
+          <div class="card-footer" data-page-node-id="HHEB3rSGapxR2MSmrYObH9">
+            <div class="card-meta" data-page-node-id="KT01XrHi46iRFqmvzvKAtP">合规投诉 · 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="fsjph61WlZEZFmIRqGSJah">复制话术</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 卡片3 -->
+      <div class="hover-card" data-page-node-id="lacj5TX3c9IdDEOrpyZGan">
+        <div class="card-content" data-page-node-id="UNCRzg2gDWMWeZFEvIRObk">
+          <div class="card-header" data-page-node-id="B8TwaK1o3i9iwnPTIB1LnS">
+            <div class="card-title" data-page-node-id="SFDkfU1AQb0dfifr7NbcIs">发货时效说明</div>
+            <div class="card-badge" data-page-node-id="Om1TfPXbDASzLAGACGLi4k">100254253261</div>
+          </div>
+          <div class="card-text" data-page-node-id="yiCEsCWWO07fpCCSmTBwkQ">小主您好，我们是京东自营仓库发货，一般下单后24小时内出库，具体以物流信息为准哦~大部分地区2-3天可以送达。</div>
+          <div class="card-footer" data-page-node-id="RR4Hnu7otUgWwNEsHmKPyZ">
+            <div class="card-meta" data-page-node-id="CUVbdPpAGVMk6UyxfAQtIU">物流问题 · 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="mJdoDX38AWnyKmhsPBXEwl">复制话术</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 卡片4 -->
+      <div class="hover-card" data-page-node-id="qS2B9htKCPgEEmpMLfui0M">
+        <div class="card-content" data-page-node-id="ThdbnAFIPDEj31ZLHTMUNH">
+          <div class="card-header" data-page-node-id="fjigjb1OG1LqPBb5Dv5duv">
+            <div class="card-title" data-page-node-id="0gosjbRj4DBmxtqawBnZuC">产品使用方法</div>
+            <div class="card-badge" data-page-node-id="jO2ovbx3J7IweoGcLK7N1s">100238746933</div>
+          </div>
+          <div class="card-text" data-page-node-id="ZrKjE7Zvy1wxtg40oyyNxy">小主您好，使用前请先清洁需要处理的部位，取适量本品均匀涂抹，轻轻按摩至吸收即可。每日2-3次，坚持使用效果更佳。</div>
+          <div class="card-footer" data-page-node-id="3s4D3LZSbdfOvF6AlGMeM8">
+            <div class="card-meta" data-page-node-id="V2GVDhUByG3GBdieN72Lxb">使用说明 · 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="OJQEKj3UVTZBQBnFsEVuzb">复制话术</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 卡片5 -->
+      <div class="hover-card" data-page-node-id="oDoIFPpMHutHMIBeVMGtQz">
+        <div class="card-content" data-page-node-id="nFXK6QZycnbT9DFnhPrYhk">
+          <div class="card-header" data-page-node-id="AibKNzISmQ7jKdR9T7z0Pw">
+            <div class="card-title" data-page-node-id="I4TcBY8dExy1RSvJUa3JPc">退换货政策</div>
+            <div class="card-badge" data-page-node-id="dprTTdDQjUPdbB8Dt2Cajl">100254253261</div>
+          </div>
+          <div class="card-text" data-page-node-id="SkoffQMu7r7FHbVash2Yvc">小主您好，我们支持7天无理由退换货，商品需保持原包装完好。如有质量问题，我们承担退换货运费。</div>
+          <div class="card-footer" data-page-node-id="voOeMFy8ZJYYXCYVhpPNdk">
+            <div class="card-meta" data-page-node-id="hEjEspHRr4wHnjUQ3bpBfh">售后政策 · 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="nLgqlWWox41rNQEGgoh2Z1">复制话术</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 卡片6 -->
+      <div class="hover-card" data-page-node-id="Yfz0uN5yUFvCUKq7AYnt9S">
+        <div class="card-content" data-page-node-id="SzC1P6SmtplBTxc5QE9JHI">
+          <div class="card-header" data-page-node-id="7ysjktxlzGIRApvECNOLK4">
+            <div class="card-title" data-page-node-id="CwCRndDv6ZjUDw3l0CAcww">优惠活动咨询</div>
+            <div class="card-badge" data-page-node-id="awVEDFHwGd2QAYfv5rwfy5">100238746933</div>
+          </div>
+          <div class="card-text" data-page-node-id="1popsCVxzpmNLzN6oD4Oco">小主您好，当前店铺有满199减30的活动，具体以商品页面显示为准。活动期间下单更优惠哦~</div>
+          <div class="card-footer" data-page-node-id="t89E5e7rMhVGRbdPJRoVHf">
+            <div class="card-meta" data-page-node-id="iHxl06lr5klhE30RBKorky">促销活动 · 2026-09-04</div>
+            <button class="copy-button" data-page-node-id="usII85B0FKTBKkNvnBUSMe">复制话术</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 复制成功提示 -->
+  <div class="toast" id="toast" data-page-node-id="TLKI90qFeFzQ0vr4rdijVM">已复制到剪贴板</div>
+  
+  <script>
+    // 模拟复制功能
+    document.querySelectorAll('.copy-button').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const card = this.closest('.hover-card');
+        const content = card.querySelector('.card-text').textContent;
+        
+        // 复制到剪贴板
+        navigator.clipboard.writeText(content).then(() => {
+          // 显示提示
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
+          
+          // 按钮状态变化
+          const originalText = this.textContent;
+          this.textContent = '✓ 已复制';
+          this.style.background = 'var(--success)';
+          this.style.borderColor = 'var(--success)';
+          this.style.color = 'white';
+          
+          // 2秒后恢复
+          setTimeout(() => {
+            this.textContent = originalText;
+            this.style.background = 'transparent';
+            this.style.borderColor = 'var(--gold)';
+            this.style.color = 'var(--gold)';
+            toast.classList.remove('show');
+          }, 2000);
+        });
+      });
+    });
+    
+    // GSAP入场动画
+    gsap.from('.hover-card', {
+      duration: 0.7,
+      y: 40,
+      opacity: 0,
+      stagger: 0.12,
+      ease: 'back.out(1.7)'
+    });
+    
+    // 搜索框动画
+    gsap.from('.search-input', {
+      duration: 0.8,
+      y: 20,
+      opacity: 0,
+      ease: 'power3.out',
+      delay: 0.3
+    });
+  </script>
+</body>
+</html>
