@@ -1026,6 +1026,7 @@
     function createCard(item) {
       const card = document.createElement('div');
       card.className = 'gsap-card';
+      card.style.cursor = 'pointer';
       
       // 处理回复内容
       let replyContent = item.reply;
@@ -1042,20 +1043,57 @@
           <div class="card-text">${replyContent}</div>
           <div class="card-footer">
             <div class="card-meta">${item.category || '未分类'} · ${item.updatedAt || ''}</div>
-            <button class="copy-button"><span>复制</span></button>
+            <div class="copy-hint" style="font-size: 11px; color: var(--muted);">点击复制</div>
           </div>
         </div>
       `;
       
-      // 复制功能
-      const copyBtn = card.querySelector('.copy-button');
-      copyBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        copyText(replyContent, copyBtn);
+      // 点击卡片复制内容
+      card.addEventListener('click', () => {
+        // 复制动画
+        gsap.to(card, {
+          duration: 0.1,
+          scale: 0.98,
+          yoyo: true,
+          repeat: 1,
+          ease: 'power2.inOut'
+        });
+        
+        // 复制到剪贴板
+        navigator.clipboard.writeText(replyContent).then(() => {
+          // 显示提示
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
+          
+          gsap.from(toast, {
+            duration: 0.3,
+            scale: 0.8,
+            ease: 'back.out(1.7)'
+          });
+          
+          // 卡片短暂高亮
+          card.style.borderColor = 'var(--success)';
+          setTimeout(() => {
+            card.style.borderColor = '';
+          }, 500);
+          
+          // 2秒后隐藏提示
+          setTimeout(() => {
+            toast.classList.remove('show');
+          }, 1500);
+        }).catch(err => {
+          console.error('复制失败:', err);
+          // 降级方案
+          const textarea = document.createElement('textarea');
+          textarea.value = replyContent;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          
+          showToast();
+        });
       });
-      
-      // 悬停动画
-      // 鼠标跟随动效
       
       // 鼠标跟随动效
       card.addEventListener('mousemove', (e) => {
