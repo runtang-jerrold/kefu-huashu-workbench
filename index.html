@@ -1073,6 +1073,12 @@
             try {
                 const response = await fetch('data.json');
                 state.data = await response.json();
+                
+                // 为每条数据添加行号（从1开始）
+                state.data.forEach((item, index) => {
+                    item.line = index + 1;
+                });
+                
                 state.filtered = [...state.data];
                 
                 hideSkeleton();
