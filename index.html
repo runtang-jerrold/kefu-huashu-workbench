@@ -171,6 +171,154 @@
             box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
         }
 
+        /* 科技感搜索框 */
+        .hero-search {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .hero-search-glow {
+            position: absolute;
+            inset: -2px;
+            border-radius: 60px;
+            background: conic-gradient(from 0deg, #ffd700, #4facfe, #764ba2, #ffd700);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 0;
+            filter: blur(4px);
+        }
+
+        .hero-search:focus-within .hero-search-glow {
+            opacity: 0.7;
+            animation: glowRotate 3s linear infinite;
+        }
+
+        @keyframes glowRotate {
+            to { filter: blur(4px) hue-rotate(360deg); }
+        }
+
+        .hero-search-inner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: rgba(18, 18, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 60px;
+            padding: 6px 6px 6px 20px;
+            z-index: 1;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .hero-search:focus-within .hero-search-inner {
+            border-color: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.3);
+            transform: scale(1.02);
+        }
+
+        .hero-search-icon {
+            color: rgba(255, 215, 0, 0.5);
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            transition: color 0.3s;
+        }
+
+        .hero-search:focus-within .hero-search-icon {
+            color: #ffd700;
+        }
+
+        .hero-search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 1.05rem;
+            padding: 14px 12px;
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        .hero-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-search-input:focus::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .hero-search-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ffd700, #ffb700);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .hero-search-btn:hover {
+            background: linear-gradient(135deg, #ffe44d, #ffc933);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+            transform: translateX(2px);
+        }
+
+        .hero-search-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* 搜索框粒子特效容器 */
+        .hero-search-particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+            border-radius: 60px;
+        }
+
+        .hero-search-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ffd700;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        /* 搜索框输入时的扫描线效果 */
+        .hero-search-inner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.06), transparent);
+            transition: none;
+            pointer-events: none;
+        }
+
+        .hero-search:focus-within .hero-search-inner::after {
+            animation: searchScan 2s ease-in-out infinite;
+        }
+
+        @keyframes searchScan {
+            0% { left: -60%; }
+            100% { left: 160%; }
+        }
+
         /* 搜索区域 - 毛玻璃卡片 */
         .search-section {
             padding: 4rem 2rem;
@@ -758,42 +906,31 @@
             <p class="hero-subtitle" data-page-node-id="xmq1kcmC0dyFvBVOUt4aep">
                 基于AI驱动的智能话术库，一键搜索、即时复制，提升客服效率300%
             </p>
-            <a href="#search" class="hero-cta" data-page-node-id="QFI4oLFoY5nOHPUIRFOtSN">
-                开始查询
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="Nq4P1fD8JJy95I6R9mpezE">
-                    <path d="M5 12h14M12 5l7 7-7 7" data-page-node-id="NDZvIJ9kUtwUP8vb6Lfewz"/>
-                </svg>
-            </a>
+            <!-- 科技感搜索框 -->
+            <div class="hero-search" id="heroSearch">
+                <div class="hero-search-glow"></div>
+                <div class="hero-search-inner">
+                    <div class="hero-search-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </div>
+                    <input type="text" class="hero-search-input" id="heroSearchInput" placeholder="输入 SKU / 关键词 / 问题描述..." autocomplete="off" spellcheck="false">
+                    <button class="hero-search-btn" id="heroSearchBtn">
+                        <span>搜索</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="hero-search-particles" id="heroSearchParticles"></div>
+            </div>
         </div>
     </section>
 
-    <!-- 搜索区域 -->
-    <section id="search" class="search-section" data-page-node-id="X7mGaz20xD9qidG6HbRcBf">
-        <div class="search-card scale-in" data-page-node-id="bTLnVaIYPqKJQE9DXQnfNb">
-            <div class="search-container" data-page-node-id="oou0ECOxasHqpECV6HEAKA">
-                <div class="search-input-group" data-page-node-id="NDm2ufKqE2NKxNrfMdJ11O">
-                    <label class="search-label" data-page-node-id="qKaofgScdDo1JSDb6kB9pg">搜索话术</label>
-                    <input type="text" class="search-input" id="searchInput" placeholder="输入SKU、关键词或问题描述..." data-page-node-id="8bUPGISj8g4yLY2S2mq37E">
-                </div>
-                <button class="search-btn" id="searchBtn" data-page-node-id="Xv5CD8Bn20yruklilvkSMQ">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;" data-page-node-id="z6gWSHppBH73ejnEAFNtJE">
-                        <circle cx="11" cy="11" r="8" data-page-node-id="FL6etUzWWrHcvxKFzfOeJO"/>
-                        <path d="m21 21-4.35-4.35" data-page-node-id="2XSCrgIckMIL3u9jTSsaUv"/>
-                    </svg>
-                    搜索
-                </button>
-            </div>
-            
-            <div class="filter-tags" id="filterTags" data-page-node-id="7YJY2xdA4bIOl5fuwNQxRV">
-                <div class="filter-tag active" data-category="" data-page-node-id="uNSJPrCBbeGjnItW1hzsoV">全部</div>
-                <div class="filter-tag" data-category="产品咨询" data-page-node-id="9Bd2xW25hIIGgipyrfcuLM">产品咨询</div>
-                <div class="filter-tag" data-category="售后服务" data-page-node-id="j8Z1PyhaFZFXuFN9rGKga9">售后服务</div>
-                <div class="filter-tag" data-category="物流问题" data-page-node-id="2vRR82hgvKASHfc7PxzPwN">物流问题</div>
-                <div class="filter-tag" data-category="投诉处理" data-page-node-id="zAuXrcYEkMs1NY88h5Zb3P">投诉处理</div>
-                <div class="filter-tag" data-category="优惠活动" data-page-node-id="946yl3q03I2SGS4XBX27H6">优惠活动</div>
-            </div>
-        </div>
-    </section>
+    <!-- 搜索区域（保留给锚点跳转，但视觉上已移入hero） -->
+    <div id="search" style="height:0;margin:0;padding:0;overflow:hidden;"></div>
 
     <!-- 话术卡片网格 -->
     <section id="cards" class="cards-section" data-page-node-id="ONKGowQ7i6KFRil0S3K7Tx">
@@ -1103,18 +1240,51 @@
 
         // 设置事件监听
         function setupEventListeners() {
-            // 搜索输入
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                state.query = e.target.value.toLowerCase();
-                state.isSearching = state.query.length > 0;
-                filterData();
-            });
+            // Hero 搜索框输入
+            const heroInput = document.getElementById('heroSearchInput');
+            const heroBtn = document.getElementById('heroSearchBtn');
+            if (heroInput) {
+                heroInput.addEventListener('input', (e) => {
+                    state.query = e.target.value.toLowerCase();
+                    state.isSearching = state.query.length > 0;
+                    filterData();
+                });
+                heroInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        state.isSearching = state.query.length > 0;
+                        filterData();
+                        // 搜索时触发粒子爆发
+                        spawnSearchBurst();
+                    }
+                });
+            }
+            if (heroBtn) {
+                heroBtn.addEventListener('click', () => {
+                    state.isSearching = state.query.length > 0;
+                    filterData();
+                    spawnSearchBurst();
+                });
+            }
 
-            // 搜索按钮
-            document.getElementById('searchBtn').addEventListener('click', () => {
-                state.isSearching = state.query.length > 0;
-                filterData();
-            });
+            // 搜索框粒子特效
+            setupSearchParticles();
+
+            // 兼容旧搜索框（如果存在）
+            const oldInput = document.getElementById('searchInput');
+            if (oldInput) {
+                oldInput.addEventListener('input', (e) => {
+                    state.query = e.target.value.toLowerCase();
+                    state.isSearching = state.query.length > 0;
+                    filterData();
+                });
+            }
+            const oldBtn = document.getElementById('searchBtn');
+            if (oldBtn) {
+                oldBtn.addEventListener('click', () => {
+                    state.isSearching = state.query.length > 0;
+                    filterData();
+                });
+            }
 
             // 筛选标签
             document.querySelectorAll('.filter-tag').forEach(tag => {
@@ -1407,6 +1577,61 @@
         function showEmptyState() {
             hideSkeleton();
             document.getElementById('emptyState').style.display = 'block';
+        }
+
+        // ========== 搜索框粒子特效 ==========
+        function setupSearchParticles() {
+            const container = document.getElementById('heroSearchParticles');
+            const input = document.getElementById('heroSearchInput');
+            if (!container || !input) return;
+
+            // 输入时持续产生微粒子
+            let particleInterval = null;
+            input.addEventListener('focus', () => {
+                particleInterval = setInterval(() => {
+                    if (document.activeElement !== input) return;
+                    createParticle(container, false);
+                }, 80);
+            });
+            input.addEventListener('blur', () => {
+                clearInterval(particleInterval);
+            });
+        }
+
+        function createParticle(container, isBurst) {
+            const p = document.createElement('div');
+            p.className = 'hero-search-particle';
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            p.style.left = x + '%';
+            p.style.top = y + '%';
+            p.style.width = (Math.random() * 3 + 1) + 'px';
+            p.style.height = p.style.width;
+            const colors = ['#ffd700', '#4facfe', '#764ba2', '#00ff88'];
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            container.appendChild(p);
+
+            const duration = isBurst ? 600 + Math.random() * 400 : 400 + Math.random() * 300;
+            const dx = (Math.random() - 0.5) * (isBurst ? 80 : 30);
+            const dy = -20 - Math.random() * (isBurst ? 60 : 20);
+
+            gsap.fromTo(p,
+                { opacity: 0.8, scale: 1 },
+                {
+                    x: dx, y: dy, opacity: 0, scale: 0,
+                    duration: duration / 1000,
+                    ease: 'power2.out',
+                    onComplete: () => p.remove()
+                }
+            );
+        }
+
+        function spawnSearchBurst() {
+            const container = document.getElementById('heroSearchParticles');
+            if (!container) return;
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => createParticle(container, true), i * 20);
+            }
         }
     </script>
 </body>
