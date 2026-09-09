@@ -930,11 +930,34 @@
         
         camera.position.z = 3;
         
+        // 滚动视差变量
+        let scrollY = 0;
+        let targetScrollY = 0;
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', () => {
+            targetScrollY = window.scrollY;
+        });
+        
         // 动画循环
         function animate() {
             requestAnimationFrame(animate);
-            particlesMesh.rotation.y += 0.001;
-            particlesMesh.rotation.x += 0.0005;
+            
+            // 平滑滚动视差
+            scrollY += (targetScrollY - scrollY) * 0.1;
+            
+            // 根据滚动调整相机Z位置（向下滚动拉近，向上滚动远离）
+            const scrollFactor = scrollY * 0.001;
+            camera.position.z = 3 - scrollFactor * 2; // 向下滚动时z减小（拉近）
+            
+            // 根据滚动调整粒子旋转速度（增强视差感）
+            const rotationSpeed = 0.001 + scrollFactor * 0.0005;
+            particlesMesh.rotation.y += rotationSpeed;
+            particlesMesh.rotation.x += rotationSpeed * 0.5;
+            
+            // 根据滚动调整粒子大小（可选效果）
+            particlesMaterial.size = 0.02 + scrollFactor * 0.005;
+            
             renderer.render(scene, camera);
         }
         
