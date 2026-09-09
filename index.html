@@ -352,7 +352,9 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 0.5rem;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
 
         .card-sku {
@@ -362,6 +364,16 @@
             background: rgba(255, 215, 0, 0.1);
             padding: 0.5rem 1rem;
             border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .card-line {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
             font-weight: 500;
         }
 
@@ -1215,6 +1227,7 @@
                     <div class="card-header">
                         <span class="card-sku">SKU: ${item.sku}</span>
                         <span class="card-category">${item.category || '未分类'}</span>
+                        <span class="card-line">行号: ${item.line}</span>
                     </div>
                     <h3 class="card-title">${item.question}</h3>
                     <div class="card-content full">${replyContent}</div>
@@ -1231,6 +1244,7 @@
                     <div class="card-header">
                         <span class="card-sku">SKU: ${item.sku}</span>
                         <span class="card-category">${item.category || '未分类'}</span>
+                        <span class="card-line">行号: ${item.line}</span>
                     </div>
                     <h3 class="card-title">${item.question}</h3>
                     <div class="card-footer">
