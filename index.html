@@ -1215,12 +1215,19 @@
         async function loadData() {
             try {
                 const response = await fetch('data.json');
-                state.data = await response.json();
+                const raw = await response.json();
                 
-                // 为每条数据添加行号（从1开始）
-                state.data.forEach((item, index) => {
-                    item.line = index + 1;
-                });
+                // 数据归一化：统一字段为字符串，防止脏数据（如 Excel 提取出的数字型 SKU）
+                // 导致 item.sku.toLowerCase is not a function，进而让整个搜索中断
+                state.data = raw.map((item, index) => ({
+                    ...item,
+                    sku: item.sku === null || item.sku === undefined ? '' : String(item.sku),
+                    title: item.title === null || item.title === undefined ? '' : String(item.title),
+                    category: item.category === null || item.category === undefined ? '' : String(item.category),
+                    question: item.question === null || item.question === undefined ? '' : String(item.question),
+                    reply: item.reply === null || item.reply === undefined ? '' : String(item.reply),
+                    line: index + 1
+                }));
 
                 // 读取最新行号：优先用数据中最后一条的 line_number 字段，否则用数组长度
                 const lastItem = state.data[state.data.length - 1];
@@ -1303,15 +1310,25 @@
 
         // 筛选数据
         function filterData() {
+            const q = state.query;
             state.filtered = state.data.filter(item => {
-                const matchesQuery = !state.query || 
-                    item.sku.toLowerCase().includes(state.query) ||
-                    item.title.toLowerCase().includes(state.query) ||
-                    item.question.toLowerCase().includes(state.query) ||
-                    item.reply.toLowerCase().includes(state.query);
-                
-                const matchesCategory = !state.category || item.category === state.category;
-                
+                let matchesQuery = true;
+                if (q) {
+                    // 逐字段安全检索：任一条数据字段异常也不影响整体搜索
+                    try {
+                        matchesQuery =
+                            String(item.sku || '').toLowerCase().includes(q) ||
+                            String(item.title || '').toLowerCase().includes(q) ||
+                            String(item.question || '').toLowerCase().includes(q) ||
+                            String(item.reply || '').toLowerCase().includes(q);
+                    } catch (err) {
+                        console.warn('跳过异常数据:', item, err);
+                        matchesQuery = false;
+                    }
+                }
+
+                const matchesCategory = !state.category || String(item.category || '') === state.category;
+
                 return matchesQuery && matchesCategory;
             });
 
