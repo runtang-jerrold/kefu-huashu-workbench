@@ -1229,9 +1229,11 @@
                     line: index + 1
                 }));
 
-                // 读取最新行号：优先用数据中最后一条的 line_number 字段，否则用数组长度
-                const lastItem = state.data[state.data.length - 1];
-                const latestLine = (lastItem && lastItem.line_number) ? lastItem.line_number : state.data.length;
+                // 读取最新行号：从后往前找最近一个带 line_number 的条目（未指定新行号时沿用上次的），否则用数组长度
+                let latestLine = state.data.length;
+                for (let i = state.data.length - 1; i >= 0; i--) {
+                    if (state.data[i].line_number) { latestLine = state.data[i].line_number; break; }
+                }
                 const lineNumEl = document.getElementById('latest-line-num');
                 if (lineNumEl) lineNumEl.textContent = latestLine;
                 
