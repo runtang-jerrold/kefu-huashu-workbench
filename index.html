@@ -302,9 +302,6 @@
 
         .hero-search-particle {
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #ffd700;
             border-radius: 50%;
             opacity: 0;
         }
@@ -1589,42 +1586,45 @@
             const input = document.getElementById('heroSearchInput');
             if (!container || !input) return;
 
-            // 输入时持续产生微粒子
-            let particleInterval = null;
+            // 默认状态：持续产生向上漂浮的粒子
+            let ambientInterval = setInterval(() => createAmbientParticle(container), 300);
+
+            // 聚焦时：粒子加速
+            let focusInterval = null;
             input.addEventListener('focus', () => {
-                particleInterval = setInterval(() => {
-                    if (document.activeElement !== input) return;
-                    createParticle(container, false);
-                }, 80);
+                clearInterval(ambientInterval);
+                focusInterval = setInterval(() => createAmbientParticle(container), 150);
             });
             input.addEventListener('blur', () => {
-                clearInterval(particleInterval);
+                clearInterval(focusInterval);
+                ambientInterval = setInterval(() => createAmbientParticle(container), 300);
             });
         }
 
-        function createParticle(container, isBurst) {
+        function createAmbientParticle(container) {
             const p = document.createElement('div');
             p.className = 'hero-search-particle';
-            const x = Math.random() * 100;
-            const y = Math.random() * 100;
-            p.style.left = x + '%';
-            p.style.top = y + '%';
-            p.style.width = (Math.random() * 3 + 1) + 'px';
-            p.style.height = p.style.width;
-            const colors = ['#ffd700', '#4facfe', '#764ba2', '#00ff88'];
+            const w = Math.random() * 3 + 1;
+            p.style.width = w + 'px';
+            p.style.height = w + 'px';
+            const colors = ['#ffd700', '#ffe44d', '#4facfe', '#764ba2'];
             p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            // 从搜索框底部随机位置开始
+            p.style.left = (5 + Math.random() * 90) + '%';
+            p.style.bottom = '0px';
             container.appendChild(p);
 
-            const duration = isBurst ? 600 + Math.random() * 400 : 400 + Math.random() * 300;
-            const dx = (Math.random() - 0.5) * (isBurst ? 80 : 30);
-            const dy = -20 - Math.random() * (isBurst ? 60 : 20);
+            const duration = 1.5 + Math.random() * 1.5;
+            const drift = (Math.random() - 0.5) * 20;
 
             gsap.fromTo(p,
-                { opacity: 0.8, scale: 1 },
+                { opacity: 0.6 + Math.random() * 0.4, y: 0 },
                 {
-                    x: dx, y: dy, opacity: 0, scale: 0,
-                    duration: duration / 1000,
-                    ease: 'power2.out',
+                    y: -(40 + Math.random() * 30),
+                    x: drift,
+                    opacity: 0,
+                    duration: duration,
+                    ease: 'power1.out',
                     onComplete: () => p.remove()
                 }
             );
@@ -1633,8 +1633,31 @@
         function spawnSearchBurst() {
             const container = document.getElementById('heroSearchParticles');
             if (!container) return;
-            for (let i = 0; i < 20; i++) {
-                setTimeout(() => createParticle(container, true), i * 20);
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const p = document.createElement('div');
+                    p.className = 'hero-search-particle';
+                    const w = Math.random() * 4 + 2;
+                    p.style.width = w + 'px';
+                    p.style.height = w + 'px';
+                    const colors = ['#ffd700', '#4facfe', '#764ba2', '#00ff88'];
+                    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    p.style.left = (10 + Math.random() * 80) + '%';
+                    p.style.bottom = '0px';
+                    container.appendChild(p);
+                    gsap.fromTo(p,
+                        { opacity: 0.9, y: 0, scale: 1 },
+                        {
+                            y: -(60 + Math.random() * 40),
+                            x: (Math.random() - 0.5) * 30,
+                            opacity: 0,
+                            scale: 0.3,
+                            duration: 0.8 + Math.random() * 0.5,
+                            ease: 'power2.out',
+                            onComplete: () => p.remove()
+                        }
+                    );
+                }, i * 40);
             }
         }
     </script>
