@@ -515,16 +515,6 @@
             font-weight: 500;
         }
 
-        .card-line {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.25rem 0.75rem;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-
         .card-category {
             font-size: 0.75rem;
             color: var(--text-secondary);
@@ -882,17 +872,11 @@
     <!-- 毛玻璃导航栏 -->
     <nav class="navbar" data-page-node-id="LA5Ea9e4Z7MSB4DjCG7Msy">
         <div class="logo" data-page-node-id="nh77yoGQ7ioKlZHUHzydov">话术工作台</div>
-        <div class="nav-center" style="display:flex;align-items:center;gap:1.5rem;">
-            <div class="nav-links" data-page-node-id="JiVGEC6KC8KuFgRGEyU0WO">
-                <a href="#" class="nav-link" data-page-node-id="SoVgx2Xa6Z7Idpq5gbdBv6">首页</a>
-                <a href="#search" class="nav-link" data-page-node-id="jIHe4MdoUa2nG27zBCJzhH">查询</a>
-                <a href="#cards" class="nav-link" data-page-node-id="jJSas0ctOWq0BIXxaCwB2Y">话术库</a>
-                <a href="#features" class="nav-link" data-page-node-id="ZksTQHzCOJdaqlvDaX7nVk">功能</a>
-            </div>
-            <div id="latest-line-badge" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 0.8rem;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.25);border-radius:20px;font-size:0.8rem;color:#ffd700;white-space:nowrap;">
-                <span style="font-size:0.7rem;">📌</span>
-                <span>最新行号：<strong id="latest-line-num">—</strong></span>
-            </div>
+        <div class="nav-links" data-page-node-id="JiVGEC6KC8KuFgRGEyU0WO">
+            <a href="#" class="nav-link" data-page-node-id="SoVgx2Xa6Z7Idpq5gbdBv6">首页</a>
+            <a href="#search" class="nav-link" data-page-node-id="jIHe4MdoUa2nG27zBCJzhH">查询</a>
+            <a href="#cards" class="nav-link" data-page-node-id="jJSas0ctOWq0BIXxaCwB2Y">话术库</a>
+            <a href="#features" class="nav-link" data-page-node-id="ZksTQHzCOJdaqlvDaX7nVk">功能</a>
         </div>
     </nav>
 
@@ -1219,24 +1203,15 @@
                 
                 // 数据归一化：统一字段为字符串，防止脏数据（如 Excel 提取出的数字型 SKU）
                 // 导致 item.sku.toLowerCase is not a function，进而让整个搜索中断
-                state.data = raw.map((item, index) => ({
+                state.data = raw.map((item) => ({
                     ...item,
                     sku: item.sku === null || item.sku === undefined ? '' : String(item.sku),
                     title: item.title === null || item.title === undefined ? '' : String(item.title),
                     category: item.category === null || item.category === undefined ? '' : String(item.category),
                     question: item.question === null || item.question === undefined ? '' : String(item.question),
-                    reply: item.reply === null || item.reply === undefined ? '' : String(item.reply),
-                    line: index + 1
+                    reply: item.reply === null || item.reply === undefined ? '' : String(item.reply)
                 }));
 
-                // 读取最新行号：从后往前找最近一个带 line_number 的条目（未指定新行号时沿用上次的），否则用数组长度
-                let latestLine = state.data.length;
-                for (let i = state.data.length - 1; i >= 0; i--) {
-                    if (state.data[i].line_number) { latestLine = state.data[i].line_number; break; }
-                }
-                const lineNumEl = document.getElementById('latest-line-num');
-                if (lineNumEl) lineNumEl.textContent = latestLine;
-                
                 state.filtered = [...state.data];
                 
                 hideSkeleton();
@@ -1434,7 +1409,6 @@
                     <div class="card-header">
                         <span class="card-sku">SKU: ${item.sku}</span>
                         <span class="card-category">${item.category || '未分类'}</span>
-                        <span class="card-line">行号: ${item.line}</span>
                     </div>
                     <h3 class="card-title">${item.question}</h3>
                     <div class="card-content full">${replyContent}</div>
@@ -1451,7 +1425,6 @@
                     <div class="card-header">
                         <span class="card-sku">SKU: ${item.sku}</span>
                         <span class="card-category">${item.category || '未分类'}</span>
-                        <span class="card-line">行号: ${item.line}</span>
                     </div>
                     <h3 class="card-title">${item.question}</h3>
                     <div class="card-footer">

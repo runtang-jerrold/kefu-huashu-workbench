@@ -6571,8 +6571,7 @@
     "category": "属性规格",
     "question": "转速分别是多少",
     "reply": "低速是9000转 高速的是12000转",
-    "updatedAt": "2026-09-09",
-    "line_number": 772
+    "updatedAt": "2026-09-09"
   },
   {
     "scope": "shop",
